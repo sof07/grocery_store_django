@@ -1,27 +1,20 @@
 from django.db import models
-from django.urls import reverse
 
 
 class Category(models.Model):
-    name = models.CharField('Название категории', max_length=200)
+    name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=200, unique=True)
+    parent = models.ForeignKey(
+        'self',
+        related_name='subcategories',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    # Связь с родительской категорией, позволяющая создавать иерархическую структуру
 
-    def get_absolute_url(self):
-        return reverse(
-            'product_catalog:product_list_by_category',
-            args=[self.slug],
-        )
-
-    class Meta:
-        ordering = ['name']
-        indexes = [
-            models.Index(fields=['name']),
-        ]
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
-
-        def __str__(self):
-            return self.name
+    def __str__(self):
+        return self.name  # Для удобного отображения названия категории
 
 
 class Product(models.Model):
@@ -40,12 +33,6 @@ class Product(models.Model):
     available = models.BooleanField('В наличии', default=True)
     created = models.DateTimeField('Дата создания', auto_now_add=True)
     updated = models.DateTimeField('Дата обновления', auto_now=True)
-
-    def get_absolute_url(self):
-        return reverse(
-            'product_catalog:product_detail',
-            args=[self.id, self.slug],
-        )
 
     class Meta:
         ordering = ['name']
