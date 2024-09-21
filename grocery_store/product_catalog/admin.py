@@ -2,10 +2,26 @@ from django.contrib import admin
 from product_catalog.models import Category, Product
 
 
+class CategoryInlane(admin.TabularInline):
+    model = Category
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug']
+    """
+    Админ-панель модели категорий
+    """
+
+    list_display = ('id', 'name', 'slug')
+    list_display_links = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
+
+    # fieldsets = (
+    #     ('Основная информация', {'fields': ('name', 'slug', 'parent')}),
+    #     ('Описание', {'fields': ('description',)}),
+    # )
+    # prepopulated_fields = {'slug': ('name',)}
+    # inlines = [CategoryInlane]
 
 
 @admin.register(Product)
