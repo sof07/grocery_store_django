@@ -72,40 +72,41 @@ class CategorySerializer(serializers.ModelSerializer):
     # subcategories = serializers.SerializerMethodField()
     subcategories = RecrusiveSerializer(required=False, many=True)
     parent = serializers.StringRelatedField()
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         list_serializer_class = ReveuListSerializer
         model = Category
-        fields = ['id', 'name', 'slug', 'parent', 'subcategories']
+        fields = (
+            'id',
+            'name',
+            'slug',
+            'parent',
+            'image',
+            'subcategories',
+        )
 
 
 class ProductsShopingCarsSerializer(serializers.ModelSerializer):
-    image = Base64ImageField(required=False, allow_null=True)
+    image_small = Base64ImageField(required=False, allow_null=True)
+    image_medium = Base64ImageField(required=False, allow_null=True)
+    image_large = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'price', 'image')
+        fields = (
+            'id',
+            'name',
+            'price',
+            'image_small',
+            'image_medium',
+            'image_large',
+        )
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(many=False, read_only=True)
     products = ProductsShopingCarsSerializer()  # разобраться с этим полм
 
     class Meta:
         model = ShoppingCart
-        fields = ('user', 'products')
-
-    # def get_subcategories(self, obj):
-    #     return CategorySerializer(obj.subcategories.all(), many=True).data
-
-    # def create(self, validated_data):
-    #     parent = validated_data.pop('parent', None)
-    #     category = Category.objects.create(parent=parent, **validated_data)
-    #     return category
-
-    # def update(self, instance, validated_data):
-    #     instance.name = validated_data.get('name', instance.name)
-    #     instance.slug = validated_data.get('slug', instance.slug)
-    #     instance.parent = validated_data.get('parent', instance.parent)
-    #     instance.save()
-    #     return instance
+        fields = ('products',)

@@ -45,5 +45,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class ShoppingCartViewSet(viewsets.ModelViewSet):
-    queryset = ShoppingCart.objects.all()
     serializer_class = ShoppingCartSerializer
+
+    def get_queryset(self):
+        return ShoppingCart.objects.filter(user=self.request.user)

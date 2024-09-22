@@ -8,6 +8,11 @@ User = get_user_model()
 class Category(models.Model):
     name = models.CharField('Название катгории', max_length=100)
     slug = models.SlugField('slug', max_length=200, unique=True)
+    image = models.ImageField(
+        upload_to='categories//%Y/%m/%d',
+        blank=True,
+        null=True,
+    )
     parent = models.ForeignKey(
         'self',
         related_name='subcategories',
@@ -31,6 +36,24 @@ class Product(models.Model):
     image = models.ImageField(
         'Фото',
         upload_to='products/%Y/%m/%d',
+        blank=True,
+        null=True,
+    )
+    image_small = models.ImageField(
+        'Маленькое фото',
+        upload_to='products/small/%Y/%m/%d',
+        blank=True,
+        null=True,
+    )
+    image_medium = models.ImageField(
+        'Среднее фото',
+        upload_to='products/medium/%Y/%m/%d',
+        blank=True,
+        null=True,
+    )
+    image_large = models.ImageField(
+        'Большое фото',
+        upload_to='products/large/%Y/%m/%d',
         blank=True,
         null=True,
     )
