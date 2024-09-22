@@ -10,7 +10,8 @@ from product_catalog.views import (
     CategoryViewSet,
     ProductViewSet,
     UserViewSet,
-    ShoppingCartViewSet,
+    # ShoppingCartViewSet,
+    CartViewSet,
 )
 
 # Создаётся роутер
@@ -18,7 +19,8 @@ router = DefaultRouter()
 router.register(r'category', CategoryViewSet, basename='pategory')
 router.register(r'product', ProductViewSet, basename='product')
 router.register(r'user', UserViewSet, basename='pser')
-router.register(r'shopingcart', ShoppingCartViewSet, basename='shopingcart')
+# router.register(r'shopingcart', ShoppingCartViewSet, basename='shopingcart')
+router.register(r'cart', CartViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

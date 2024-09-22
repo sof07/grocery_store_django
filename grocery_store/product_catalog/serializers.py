@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import base64
 
-from .models import Category, Product, User, ShoppingCart
+from .models import Category, Product, User, CartItem, Cart
 
 from django.core.files.base import ContentFile
 
@@ -104,9 +104,42 @@ class ProductsShopingCarsSerializer(serializers.ModelSerializer):
         )
 
 
-class ShoppingCartSerializer(serializers.ModelSerializer):
-    products = ProductsShopingCarsSerializer()  # разобраться с этим полм
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'quantity']
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, required=False)
+    user = serializers.StringRelatedField(read_only=True)
+    items = serializers.StringRelatedField(read_only=True, many=True)
 
     class Meta:
-        model = ShoppingCart
-        fields = ('products',)
+        model = Cart
+        fields = ['id', 'user', 'items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        cart = Cart.objects.create(**validated_data)
+        for item_data in items_data:
+            CartItem.objects.create(cart=cart, **item_data)
+        return cart
+
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items', [])
+        instance.save()
+
+        # Обработка элементов корзины
+        for item_data in items_data:
+            item_id = item_data.get('id', None)
+            if item_id:
+                # Обновить существующий элемент
+                item = CartItem.objects.get(id=item_id, cart=instance)
+                item.quantity = item_data.get('quantity', item.quantity)
+                item.save()
+            else:
+                # Создать новый элемент
+                CartItem.objects.create(cart=instance, **item_data)
+
+        return instance

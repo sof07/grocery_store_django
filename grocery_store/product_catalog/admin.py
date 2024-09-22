@@ -1,5 +1,5 @@
 from django.contrib import admin
-from product_catalog.models import Category, Product
+from product_catalog.models import Category, Product, Cart, CartItem
 from django import forms
 
 
@@ -18,7 +18,7 @@ class CategoryForm(forms.ModelForm):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     form = CategoryForm
-    list_display = ('name', 'parent', 'slug', 'get_subcategories_count')
+    list_display = ('name', 'parent', 'slug', 'image', 'get_subcategories_count')
     search_fields = ('name',)
     list_filter = ('parent',)
     prepopulated_fields = {'slug': ('name',)}
@@ -30,27 +30,14 @@ class CategoryAdmin(admin.ModelAdmin):
     get_subcategories_count.short_description = 'Количество подкатегорий'
 
 
-# class CategoryInlane(admin.TabularInline):
-#     model = Category
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'created_at')
 
 
-# @admin.register(Category)
-# class CategoryAdmin(admin.ModelAdmin):
-#     """
-#     Админ-панель модели категорий
-#     """
-
-#     list_display = ('id', 'name', 'slug')
-#     list_display_links = ('name', 'slug')
-#     prepopulated_fields = {'slug': ('name',)}
-
-
-#     # fieldsets = (
-#     #     ('Основная информация', {'fields': ('name', 'slug', 'parent')}),
-#     #     ('Описание', {'fields': ('description',)}),
-#     # )
-#     # prepopulated_fields = {'slug': ('name',)}
-#     # inlines = [CategoryInlane]
+@admin.register(CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ('cart', 'product', 'quantity')
 
 
 @admin.register(Product)
@@ -60,12 +47,16 @@ class ProductAdmin(admin.ModelAdmin):
         'slug',
         'price',
         'available',
+        'category',
+        'image_small',
+        'image_medium',
+        'image_large',
         'created',
         'updated',
     ]
     list_filter = ['available', 'created', 'updated']
-    list_editable = ['price', 'available']
+    list_editable = ['price', 'available', 'category']
     prepopulated_fields = {'slug': ('name',)}
 
 
-# Register your models here.
+admin.site.empty_value_display = 'Не задано'
