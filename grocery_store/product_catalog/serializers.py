@@ -47,7 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'products')
-        # ref_name = 'ReadOnlyUsers'
+        ref_name = 'MyAppUser'
 
 
 class ProductSerrializer(serializers.ModelSerializer):
@@ -65,6 +65,8 @@ class ProductSerrializer(serializers.ModelSerializer):
             'description',
             'price',
             'category',
+            'currency',
+            'unit_of_measurement',
         )
 
 
@@ -114,10 +116,18 @@ class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, required=False)
     user = serializers.StringRelatedField(read_only=True)
     items = serializers.StringRelatedField(read_only=True, many=True)
+    total_sum = serializers.SerializerMethodField()
+    number_of_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'items']
+        fields = [
+            'id',
+            'user',
+            'number_of_products',
+            'total_sum',
+            'items',
+        ]
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])
@@ -143,3 +153,18 @@ class CartSerializer(serializers.ModelSerializer):
                 CartItem.objects.create(cart=instance, **item_data)
 
         return instance
+
+    def get_total_sum(self, obj):
+        """
+        Вычисляет стоимость товаров в корзине
+        """
+        total = 0
+        for item in obj.items.all():
+            total += item.product.price * item.quantity
+        return total
+
+    def get_number_of_products(self, obj):
+        """
+        Вычисляет количество товаров в корзине
+        """
+        return obj.items.count()

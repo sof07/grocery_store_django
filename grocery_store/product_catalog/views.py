@@ -22,6 +22,7 @@ from rest_framework import status, permissions
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = None
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -93,9 +94,12 @@ class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         # Ограничиваем выборку только корзиной для текущего пользователя
+        if getattr(self, 'swagger_fake_view', False):
+            return self.queryset.none()  # Возвращаем пустой queryset или дефолтный
         return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
