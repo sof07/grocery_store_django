@@ -50,26 +50,6 @@ class UserSerializer(serializers.ModelSerializer):
         ref_name = 'MyAppUser'
 
 
-class ProductSerrializer(serializers.ModelSerializer):
-    # category = CategorySerializer_()
-    image = Base64ImageField(required=False, allow_null=True)
-    slug = serializers.PrimaryKeyRelatedField(read_only=True)
-    # category = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = Product
-        fields = (
-            'name',
-            'slug',
-            'image',
-            'description',
-            'price',
-            'category',
-            'currency',
-            'unit_of_measurement',
-        )
-
-
 class CategorySerializer(serializers.ModelSerializer):
     # subcategories = serializers.SerializerMethodField()
     subcategories = RecrusiveSerializer(required=False, many=True)
@@ -86,6 +66,30 @@ class CategorySerializer(serializers.ModelSerializer):
             'parent',
             'image',
             'subcategories',
+        )
+
+
+class ProductSerrializer(serializers.ModelSerializer):
+    # category = CategorySerializer_()
+    image_small = Base64ImageField(required=False, allow_null=True)
+    image_medium = Base64ImageField(required=False, allow_null=True)
+    image_large = Base64ImageField(required=False, allow_null=True)
+    slug = serializers.PrimaryKeyRelatedField(read_only=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = (
+            'name',
+            'slug',
+            'image_small',
+            'image_medium',
+            'image_large',
+            'description',
+            'price',
+            'category',
+            'currency',
+            'unit_of_measurement',
         )
 
 
@@ -109,7 +113,11 @@ class ProductsShopingCarsSerializer(serializers.ModelSerializer):
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        fields = ['id', 'product', 'quantity']
+        fields = (
+            'id',
+            'product',
+            'quantity',
+        )
 
 
 class CartSerializer(serializers.ModelSerializer):

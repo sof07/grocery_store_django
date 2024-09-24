@@ -14,6 +14,7 @@ from .serializers import (
     UserSerializer,
     # ShoppingCartSerializer,
     CartSerializer,
+    CartItemSerializer,
 )
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -22,6 +23,10 @@ from rest_framework import status, permissions
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = [
+        'get',
+    ]
     pagination_class = None
 
 
@@ -34,9 +39,13 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerrializer
     permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get', 'post']
 
-    def perform_create(self, serializer):
-        serializer.save()  # Метод для создания товара
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {'error': 'Добавить продукт возможно только через панель администратора'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
     @action(detail=True, methods=['post', 'delete'], url_path='shopping_cart')
     def shopping_cart(self, request, pk=None):
@@ -120,3 +129,14 @@ class CartViewSet(viewsets.ModelViewSet):
             )
 
         return Response({'total_price': total_price}, status=status.HTTP_200_OK)
+
+
+class CartItemViewSet(viewsets.ModelViewSet):
+    queryset = CartItem.objects.all()
+    serializer_class = CartItemSerializer
+
+    def get_queryset(self):
+        # Ограничиваем выборку только корзиной для текущего пользователя
+        if getattr(self, 'swagger_fake_view', False):
+            return self.queryset.none()  # Возвращаем пустой queryset или дефолтный
+        return self.queryset.filter(cart__user=self.request.user)

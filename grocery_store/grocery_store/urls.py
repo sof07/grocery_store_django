@@ -5,7 +5,6 @@ from django.conf.urls.static import static
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
-from django.urls import re_path
 
 
 from django.urls import include, path
@@ -16,6 +15,7 @@ from product_catalog.views import (
     UserViewSet,
     # ShoppingCartViewSet,
     CartViewSet,
+    CartItemViewSet,
 )
 
 # Создаётся роутер
@@ -25,6 +25,7 @@ router.register(r'product', ProductViewSet, basename='product')
 router.register(r'user', UserViewSet, basename='pser')
 # router.register(r'shopingcart', ShoppingCartViewSet, basename='shopingcart')
 router.register(r'cart', CartViewSet)
+# router.register(r'cartitem', CartItemViewSet)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -42,10 +43,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    # Djoser создаст набор необходимых эндпоинтов.
-    # базовые, для управления пользователями в Django:
     path('auth/', include('djoser.urls')),
-    # JWT-эндпоинты, для управления JWT-токенами:
     path('auth/', include('djoser.urls.jwt')),
     path(
         'swagger<format>/',
