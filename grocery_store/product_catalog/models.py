@@ -1,8 +1,8 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from product_catalog.utils import unique_slugify
+from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
+from product_catalog.utils import unique_slugify
 
 User = get_user_model()
 

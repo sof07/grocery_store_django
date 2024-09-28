@@ -1,9 +1,10 @@
-from rest_framework import serializers
 import base64
 
-from .models import Category, Product, User, CartItem, Cart
-
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers
+
+from .models import Cart, CartItem, Category, Product, User
 
 
 class Base64ImageField(serializers.ImageField):
@@ -51,7 +52,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    # subcategories = serializers.SerializerMethodField()
     subcategories = RecrusiveSerializer(required=False, many=True)
     parent = serializers.StringRelatedField()
     image = Base64ImageField(required=False, allow_null=True)
@@ -70,7 +70,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerrializer(serializers.ModelSerializer):
-    # category = CategorySerializer_()
     image_small = Base64ImageField(required=False, allow_null=True)
     image_medium = Base64ImageField(required=False, allow_null=True)
     image_large = Base64ImageField(required=False, allow_null=True)
@@ -111,6 +110,8 @@ class ProductsShopingCarsSerializer(serializers.ModelSerializer):
 
 
 class CartItemSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
+
     class Meta:
         model = CartItem
         fields = (
@@ -123,7 +124,6 @@ class CartItemSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, required=False)
     user = serializers.StringRelatedField(read_only=True)
-    items = serializers.StringRelatedField(read_only=True, many=True)
     total_sum = serializers.SerializerMethodField()
     number_of_products = serializers.SerializerMethodField()
 
@@ -145,20 +145,16 @@ class CartSerializer(serializers.ModelSerializer):
         return cart
 
     def update(self, instance, validated_data):
-        items_data = validated_data.pop('items', [])
-        instance.save()
-
-        # Обработка элементов корзины
+        items_data = self.initial_data['items']
         for item_data in items_data:
             item_id = item_data.get('id', None)
             if item_id:
-                # Обновить существующий элемент
-                item = CartItem.objects.get(id=item_id, cart=instance)
-                item.quantity = item_data.get('quantity', item.quantity)
-                item.save()
-            else:
-                # Создать новый элемент
-                CartItem.objects.create(cart=instance, **item_data)
+                item = get_object_or_404(CartItem, id=item_id)
+                if item_data.get('quantity') > 0:
+                    item.quantity = item_data.get('quantity')
+                    item.save()
+                else:
+                    item.delete()
 
         return instance
 

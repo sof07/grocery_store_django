@@ -1,31 +1,27 @@
-from django.contrib import admin
-from rest_framework.routers import DefaultRouter
-from . import settings
 from django.conf.urls.static import static
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from rest_framework import permissions
-
-
+from django.contrib import admin
 from django.urls import include, path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from rest_framework.routers import DefaultRouter
 
 from product_catalog.views import (
+    CartItemViewSet,
+    CartViewSet,
     CategoryViewSet,
     ProductViewSet,
     UserViewSet,
-    # ShoppingCartViewSet,
-    CartViewSet,
-    CartItemViewSet,
 )
 
-# Создаётся роутер
+from . import settings
+
 router = DefaultRouter()
 router.register(r'category', CategoryViewSet, basename='pategory')
 router.register(r'product', ProductViewSet, basename='product')
-router.register(r'user', UserViewSet, basename='pser')
-# router.register(r'shopingcart', ShoppingCartViewSet, basename='shopingcart')
-router.register(r'cart', CartViewSet)
-# router.register(r'cartitem', CartItemViewSet)
+router.register(r'user', UserViewSet, basename='user')
+router.register(r'cart', CartViewSet, basename='cart')
+router.register(r'cartitem', CartItemViewSet, basename='cartitem')
 
 schema_view = get_schema_view(
     openapi.Info(

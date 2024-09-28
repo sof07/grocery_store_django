@@ -1,23 +1,15 @@
-from rest_framework import viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
-from .models import (
-    Category,
-    Product,
-    User,
-    # ShoppingCart,
-    Cart,
-    CartItem,
-)
+from rest_framework.response import Response
+
+from .models import Cart, CartItem, Category, Product, User
 from .serializers import (
+    CartItemSerializer,
+    CartSerializer,
     CategorySerializer,
     ProductSerrializer,
     UserSerializer,
-    # ShoppingCartSerializer,
-    CartSerializer,
-    CartItemSerializer,
 )
-from rest_framework.response import Response
-from rest_framework import status, permissions
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -80,7 +72,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             )
 
         elif request.method == 'DELETE':
-            # Удаляем товар из корзины
             try:
                 cart_item = CartItem.objects.get(cart=cart, product=product)
                 cart_item.delete()
@@ -112,9 +103,6 @@ class CartViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-    def perform_update(self, serializer):
         serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'], url_path='cart_total')

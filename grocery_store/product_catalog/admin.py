@@ -1,8 +1,9 @@
 from django.contrib import admin
-from product_catalog.models import Category, Product, Cart, CartItem
-from django_mptt_admin.admin import DjangoMpttAdmin
-from django.forms import TextInput, Textarea
 from django.db import models
+from django.forms import Textarea, TextInput
+from django_mptt_admin.admin import DjangoMpttAdmin
+
+from product_catalog.models import Cart, CartItem, Category, Product
 
 
 class YourModelAdmin(admin.ModelAdmin):
